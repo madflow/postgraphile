@@ -124,11 +124,7 @@ const serverCreators = new Map([
         return server;
       }
       const app = fastify({ serverFactory });
-      if (subpath) {
-        throw new Error('Fastify does not support subpath at this time');
-      } else {
-        app.use(handler);
-      }
+      app.use(handler);
       await app.ready();
       if (!server) {
         throw new Error('Fastify server not created!');
@@ -161,11 +157,7 @@ const serverCreators = new Map([
         return server;
       }
       const app = fastify({ serverFactory, http2: true });
-      if (subpath) {
-        throw new Error('Fastify does not support subpath at this time');
-      } else {
-        app.use(handler);
-      }
+      app.use(handler);
       await app.ready();
       if (!server) {
         throw new Error('Fastify server not created!');
@@ -179,7 +171,7 @@ const serverCreators = new Map([
 const toTest = [];
 for (const [name, createServerFromHandler] of Array.from(serverCreators)) {
   toTest.push({ name, createServerFromHandler });
-  if (name !== 'http' && name !== 'fastify' && name !== 'fastify-http2') {
+  if (name !== 'http') {
     toTest.push({ name, createServerFromHandler, subpath: '/path/to/mount' });
   }
 }
