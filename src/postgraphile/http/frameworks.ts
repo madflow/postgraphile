@@ -1,6 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'http';
-import { PassThrough, Stream } from 'stream';
+import { PassThrough, Readable, Stream } from 'stream';
 import { Context as KoaContext } from 'koa';
+import { FastifyRequest, FastifyReply, RawServerBase } from 'fastify';
+
 
 type Headers = { [header: string]: string };
 
@@ -222,5 +224,41 @@ export class PostGraphileResponseKoa extends PostGraphileResponse {
   setBody(body: Stream | Buffer | string | undefined) {
     this._ctx.body = body || '';
     this._next();
+  }
+}
+
+
+
+export class PostGraphileResponseFastify extends PostGraphileResponse {
+
+  private _req: FastifyRequest;
+  private _res: any;
+
+  constructor(req: FastifyRequest, res: FastifyReply<RawServerBase>) {
+    super();
+    this._req = req;
+    this._res = res;
+  }
+
+  getNodeServerRequest() {
+    return this._req.raw;
+  }
+
+  getNodeServerResponse() {
+    return this._res.raw;
+  }
+
+
+  setBody(body: Stream | Buffer | string | undefined) {
+    this._res.send(body);
+  }
+
+  setHeaders(statusCode: number, headers: Headers) {
+    for (const key in headers) {
+      if (Object.hasOwnProperty.call(headers, key)) {
+        this._res.header(key, headers[key]);
+      }
+    }
+    this._res.code(statusCode);
   }
 }
